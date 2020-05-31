@@ -32,7 +32,7 @@ phoneRouter.post('/check', async (req, res) => {
             code,
         });
 
-        delete session?.user.password;
+        delete session?.user?.password;
 
         return res.json(session);
     } catch (error) {

@@ -1,4 +1,6 @@
 import app from './App';
 
-// eslint-disable-next-line no-console
-app.listen(3333, () => console.log('working'));
+app.listen(process.env.PORT, () =>
+    // eslint-disable-next-line no-console
+    console.log(`working at ${process.env.PORT}`),
+);

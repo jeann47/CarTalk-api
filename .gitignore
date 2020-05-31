@@ -3,3 +3,4 @@ node_modules
 dist
 ormconfig.json
 README.MD
+yarn-error.log
