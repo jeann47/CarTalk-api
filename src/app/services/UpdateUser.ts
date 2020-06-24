@@ -22,7 +22,7 @@ interface Response {
 }
 
 class UpdateUser {
-    public async run(newData: Request): Promise<boolean> {
+    public async run(newData: Request): Promise<User | null> {
         const usersRepository = getRepository(User);
         const { id } = newData;
 
@@ -50,7 +50,8 @@ class UpdateUser {
 
         try {
             await usersRepository.update(id, updatedUser);
-            return true;
+            const updated = await usersRepository.findOne(id);
+            return updated || null;
         } catch {
             throw new Error('update failed!');
         }

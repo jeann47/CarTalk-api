@@ -32,7 +32,6 @@ class Io {
         this.io.on('connection', socket => {
             const { user_id } = socket.handshake.query;
             this.connectedUsers[user_id] = { id: socket.id };
-
             socket.on('disconnect', () => {
                 delete this.connectedUsers[user_id];
             });
@@ -52,28 +51,32 @@ class Io {
             socket.on('confirmNumber', ({ phone, for: target }) => {
                 socket
                     .to(this.connectedUsers[target].id)
-                    .emit('contactAllowed', phone);
+                    .emit('contactAllowed', phone, user_id);
             });
 
             socket.on('pos', async ({ range }) => {
-                const near: string[] = [];
-                const distance = {} as ObjectLiteral;
-                const to = {} as ObjectLiteral;
-                // eslint-disable-next-line array-callback-return
-                Object.entries(this.connectedUsers).map(user => {
-                    if (user[0] !== user_id && user[1].coordinate) {
-                        const dist = this.CoordsToM(
-                            this.connectedUsers[user_id].coordinate,
-                            user[1].coordinate,
-                        );
-                        if (dist <= range) {
-                            near.push(user[0]);
-                            distance[user[0]] = user[1].coordinate;
-                            to[user[0]] = user[1].route;
+                try {
+                    const near: string[] = [];
+                    const distance = {} as ObjectLiteral;
+                    const to = {} as ObjectLiteral;
+                    // eslint-disable-next-line array-callback-return
+                    Object.entries(this.connectedUsers).map(user => {
+                        if (user[0] !== user_id && user[1].coordinate) {
+                            const dist = this.CoordsToM(
+                                this.connectedUsers[user_id].coordinate,
+                                user[1].coordinate,
+                            );
+                            if (dist <= range) {
+                                near.push(user[0]);
+                                distance[user[0]] = user[1].coordinate;
+                                to[user[0]] = user[1].route;
+                            }
                         }
-                    }
-                });
-                socket.emit('positions', { near, distance, routes: to });
+                    });
+                    socket.emit('positions', { near, distance, routes: to });
+                } catch (error) {
+                    socket.emit('failed', error);
+                }
             });
         });
     }

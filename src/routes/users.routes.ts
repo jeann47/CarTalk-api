@@ -69,10 +69,9 @@ usersRouter.put('/', async (req, res) => {
         if (oldPassword.length === 0) {
             delete newData.password;
         }
+        const user = await updateUser.run(newData);
 
-        const updated = await updateUser.run(newData);
-
-        return res.json({ updated });
+        return res.json({ user, newToken: req.user.newToken });
     } catch (error) {
         return res.status(400).json({ error: error.message });
     }
@@ -99,7 +98,7 @@ usersRouter.get('/this', async (req, res) => {
         const user = await findUserById.run(req.user.id);
         delete user?.password;
 
-        return res.json(user);
+        return res.json({ user, newToken: req.user.newToken });
     } catch (error) {
         return res.status(400).json({ error: error.message });
     }
@@ -107,11 +106,11 @@ usersRouter.get('/this', async (req, res) => {
 usersRouter.get('/near', async (req, res) => {
     try {
         const findNearUsers = new FindNearUsers();
-        const { near } = req.body;
+        const { near } = req.query;
 
-        const user = await findNearUsers.run(near);
+        const user = await findNearUsers.run(near as string[]);
 
-        return res.json(user);
+        return res.json({ user, newToken: req.user.newToken });
     } catch (error) {
         return res.status(400).json({ error: error.message });
     }

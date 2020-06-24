@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { verify } from 'jsonwebtoken';
+import { verify, sign } from 'jsonwebtoken';
 import authConfig from '../../config/auth';
 
 interface TokenPayload {
@@ -20,12 +20,19 @@ export default function checkAuth(
 
     const [, token] = authHeader.split(' ');
     try {
-        const decoded = verify(token, authConfig.jwt.secret);
+        const { secret, expiresIn } = authConfig.jwt;
+        const decoded = verify(token, secret);
 
         const { sub } = decoded as TokenPayload;
 
+        const newToken = sign({}, secret, {
+            subject: sub,
+            expiresIn,
+        });
+
         req.user = {
             id: sub,
+            newToken,
         };
 
         return next();

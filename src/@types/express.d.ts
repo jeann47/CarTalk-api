@@ -5,6 +5,7 @@ declare namespace Express {
     export interface Request {
         user: {
             id: string;
+            newToken: string;
         };
         io: Server;
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
